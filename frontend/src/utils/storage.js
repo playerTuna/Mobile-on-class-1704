@@ -4,7 +4,17 @@ export const STORAGE_KEYS = {
 };
 
 export function getApiBase() {
-  return localStorage.getItem(STORAGE_KEYS.apiBase) || 'http://localhost:3000';
+  const storedApiBase = localStorage.getItem(STORAGE_KEYS.apiBase);
+  if (storedApiBase) {
+    return storedApiBase.replace(/\/+$/, '');
+  }
+
+  const envApiBase = import.meta.env.VITE_API_URL?.trim();
+  if (envApiBase) {
+    return envApiBase.replace(/\/+$/, '');
+  }
+
+  return 'http://localhost:3000';
 }
 
 export function setApiBase(value) {

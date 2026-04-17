@@ -4,9 +4,9 @@ description: Checkout code and install Node.js dependencies for the app/ directo
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@v4
       with:
         node-version-file: 'app/package.json'
         cache: npm
