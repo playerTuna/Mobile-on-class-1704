@@ -1,0 +1,161 @@
+{
+  "links": {
+    "HOSTING": "https://mobile-on-class-1704-cifl-chi.vercel.app/",
+    "GITHUB": "https://github.com/playerTuna/Mobile-on-class-1704.git"
+  },
+  "info": {
+    "_postman_id": "d2b6f3d1-6b9f-4d83-8d44-0c7f6b1d7b01",
+    "name": "Task Management API (v1) — CRUD + DTO",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "CRUD cho Tasks + DTO schema mẫu, chạy trên cloud với Swagger `/api-docs`."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "taskId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["v1", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pham\",\n  \"email\": \"pham@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "description": "DTO: RegisterDto { name, email, password } → AuthResponseDto (token + user)"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["v1", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pham@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "description": "DTO: LoginDto { email, password } → AuthResponseDto"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json?.token?.accessToken) {",
+                  "    pm.collectionVariables.set('token', json.token.accessToken);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/v1/auth/profile", "host": ["{{baseUrl}}"], "path": ["v1", "auth", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks (CRUD)",
+      "item": [
+        {
+          "name": "List tasks",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/v1/tasks", "host": ["{{baseUrl}}"], "path": ["v1", "tasks"] },
+            "description": "Response: RetrieveTaskDto[]"
+          }
+        },
+        {
+          "name": "Create task",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/v1/tasks", "host": ["{{baseUrl}}"], "path": ["v1", "tasks"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Buy groceries\",\n  \"description\": \"Milk, eggs, bread\",\n  \"due_date\": \"2026-04-30T00:00:00.000Z\",\n  \"category_id\": null\n}"
+            },
+            "description": "DTO: CreateTaskDto { title, description?, due_date?, category_id? }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json?.id) {",
+                  "    pm.collectionVariables.set('taskId', json.id);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update task",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tasks", "{{taskId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Buy groceries (updated)\",\n  \"status\": \"IN_PROGRESS\"\n}"
+            },
+            "description": "DTO: UpdateTaskDto { title?, description?, due_date?, category_id?, status? }"
+          }
+        },
+        {
+          "name": "Delete task",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/v1/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tasks", "{{taskId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    }
+  ]
+}
+
